@@ -39,15 +39,68 @@
  *     the scope of his variables and of course, makes use of
  *     event delegation, to keep his event listeners tidied up!
  *
- *     You - 2026-03-25
+ *     Laila  - 2026-03-25
  *******************************************************/
 let sumExpenses = 0; //Use this variable to keep the sum up to date.
+//input output prim nodes
+const expenseForm = document.querySelector("form");
+const expenseTableBody = document.querySelector("#expenses tbody");
+const totalSumDisplay = document.querySelector("#expenseSum");
+//allows reactions to browser
+expenseForm.addEventListener("submit", submitForm);
+expenseTableBody.addEventListener("click", deleteExpense);
 
-function submitForm(e){
+function submitForm(e) {
     //TODO: Prevent the default behavior of the submit button.
-    //TODO: Validate the form. If everything is fine, add the expense to the tracker and reset the form.
-}
+    e.preventDefault(); // page stays still , preventing default
+    // selecting html elements using const, --> wont change
+    const userDateInput = document.querySelector("#date");
+    const amountInput = document.querySelector("#amount");
+    const expenseInput = document.querySelector("#expense");
 
+    //TODO: Validate the form. If everything is fine, add the expense to the tracker and reset the form.
+
+    // Date is valid, if it's not empty.
+    // Amount is valid, if it's at least 0.01.
+    // Text is valid, if it's at least 3 letters long.
+
+    if (isEmpty(userDateInput.value)){
+        userDateInput.focus(); // focus() will send back to empty or wrong input box/field e.g. if i write "eg" or "21" etc , when pressing submit it will send back to that input box where i have a mistake
+        return; // ends when empty
+    }
+
+    if (expenseInput.value.length <3){
+        expenseInput.focus();
+        return;
+    }
+    const amountValue = parseFloat(amountInput.value); // to use if (isNaN...) parseFloat converts string to nr
+    if (isNaN(amountValue) || amountValue < 0.01){
+        amountInput.focus();
+        return;
+    }
+    // manipulates values and updates sum
+    sumExpenses += amountValue;
+    // new element and append
+    const newRow = document.createElement("tr");
+    newRow.innerHTML =
+        "<td>" + userDateInput.value + "</td>" +
+        "<td>" + formatEuro(amountValue) + "</td>" +
+        "<td>" + expenseInput.value + "</td>" +
+        "<td> <button class = 'delete-btn' data-amount='"+ amountValue + "'>Delete</button> </td>";
+
+    expenseTableBody.append(newRow);
+    totalSumDisplay.innerHTML = formatEuro(sumExpenses);
+    e.target.reset(); // resets after succ. output
+}
+// functional delete btn
+function deleteExpense(e) {
+    if(e.target.classList.contains("delete-btn")){ // checks in element for delete btn
+        const amount = parseFloat(e.target.getAttribute("data-amount"));
+        sumExpenses -= amount;// removes amount
+        totalSumDisplay.innerHTML = formatEuro(sumExpenses); // updates all amount of expenses
+        e.target.closest("tr").remove(); // e.target is a btn , clicking it will delete tr row that is closest
+    }
+}
 
 /*****************************
  * DO NOT CHANGE CODE BELOW.
